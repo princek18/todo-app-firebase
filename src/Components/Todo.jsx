@@ -1,11 +1,13 @@
 import React from 'react'
+import { db } from './firebase_db'
 
-export const Todo = ({todos}) => {
+export const Todo = ({todo}) => {
+    const deleteTodo = () => {
+        db.collection('todos').doc(todo.id).delete();
+    }
     return (
         <div>
-            {todos.map((todo, index) => {
-                return <h1 key={index}>{todo}</h1>
-            })}
+            <h1 onClick={deleteTodo}>{todo.todo}</h1>
         </div>
     )
 }

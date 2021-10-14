@@ -9,7 +9,7 @@ export const MainComponent = () => {
 
     useEffect(() => {
         db.collection('todos').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
-            setTodos(snapshot.docs.map(doc => doc.data().todo))
+            setTodos(snapshot.docs.map(doc => ({id: doc.id, todo: doc.data().todo})))
         })
     }, [])
 
@@ -32,7 +32,9 @@ export const MainComponent = () => {
                 <input type="text" onChange={update} value={input} required />
                 <button type="submit">Add</button>
             </form>
-            <Todo todos={todos}/>
+            {todos.map((todo, index) => {
+                return <Todo key={index} todo={todo}/>
+            })}
         </div>
     )
 }
