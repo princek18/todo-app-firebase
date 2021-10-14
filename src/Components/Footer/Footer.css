@@ -1,0 +1,11 @@
+.bottom-foot{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: black;
+    color: white;
+    height: 3rem;
+    position: relative;
+    top: 70vh;
+    width: 100%;
+}
