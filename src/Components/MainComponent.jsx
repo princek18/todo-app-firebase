@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Todo } from "./Todo";
 import { db } from "./firebase_db";
 import firebase from "firebase";
-import { Input, Button, Col, Row,} from "antd";
+import Loader from "./Loader/Loader";
+import { Input, Button, Col, Row } from "antd";
 
 export const MainComponent = () => {
   const [todos, setTodos] = useState([]);
@@ -32,20 +33,40 @@ export const MainComponent = () => {
   };
   return (
     <div>
-        <form onSubmit={addTodo}>
-            <Row justify="center">
-                <Col md={16} lg={16} sm={16} xs={20}>
-                <Input placeholder="Enter any task..." required style={{marginBottom: "10px", boxShadow: "rgba(100, 100, 111, 0.2) 0px 7px 29px 0px"}} value={input} onChange={update} type="text"/>
-                </Col>
-                <Col md={12} lg={12} sm={16} xs={20}>
-                <Button type="primary" htmlType="submit">Add</Button>
-                </Col>
-            </Row>
-        </form>
+      <form onSubmit={addTodo}>
         <Row justify="center">
-      {todos.map((todo, index) => {
-        return <Col key={index} style={{margin: "20px 20px"}}><Todo todo={todo} /></Col>;
-      })}
+          <Col md={16} lg={16} sm={16} xs={20}>
+            <Input
+              placeholder="Enter any task..."
+              required
+              style={{
+                marginBottom: "10px",
+                boxShadow: "rgba(100, 100, 111, 0.2) 0px 7px 29px 0px",
+              }}
+              value={input}
+              onChange={update}
+              type="text"
+            />
+          </Col>
+          <Col md={12} lg={12} sm={16} xs={20}>
+            <Button type="primary" htmlType="submit">
+              Add
+            </Button>
+          </Col>
+        </Row>
+      </form>
+      <Row justify="center">
+        {todos.length === 0 ? (
+          <Loader />
+        ) : (
+          todos.map((todo, index) => {
+            return (
+              <Col key={index} style={{ margin: "20px 20px" }}>
+                <Todo todo={todo} />
+              </Col>
+            );
+          })
+        )}
       </Row>
     </div>
   );
