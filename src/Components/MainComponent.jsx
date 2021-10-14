@@ -34,10 +34,10 @@ export const MainComponent = () => {
     <div>
         <form onSubmit={addTodo}>
             <Row justify="center">
-                <Col md={12} lg={12} sm={16} xs={20}>
+                <Col md={16} lg={16} sm={16} xs={20}>
                 <Input required style={{marginBottom: "10px", boxShadow: "rgba(100, 100, 111, 0.2) 0px 7px 29px 0px"}} value={input} onChange={update} type="text"/>
-                <Col>
                 </Col>
+                <Col md={12} lg={12} sm={16} xs={20}>
                 <Button type="primary" htmlType="submit">Add</Button>
                 </Col>
             </Row>
