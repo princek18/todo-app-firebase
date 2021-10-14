@@ -45,7 +45,7 @@ export const Todo = ({ todo }) => {
         </Button>
       </Card>
       <Modal
-        title="Basic Modal"
+        title="Edit Task"
         visible={visibility}
         onOk={() => editTodo(todo.id)}
         onCancel={handleCancel}
