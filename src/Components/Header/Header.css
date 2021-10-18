@@ -1,8 +1,22 @@
-.top-head{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: black;
+.head-page{
+    height: 4rem;
+    background-color: #98d3f5;
+    font-family: 'Open Sans', sans-serif;
+    border-bottom: 1px solid black;
+}
+.started{
+    height: 2.5rem;
+    width: 6rem;
+    border-radius: 2rem;
+    border: none;
     color: white;
-    height: 3rem;
+    background-color: black;
+    cursor: pointer;
+}
+.name{
+    font-size: 2rem;
+    font-weight: bolder;
+}
+.cnt{
+    text-align: center;
 }

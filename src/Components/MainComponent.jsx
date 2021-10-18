@@ -1,38 +1,53 @@
 import React, { useState, useEffect } from "react";
 import { Todo } from "./Todo";
 import { db } from "./firebase_db";
-import firebase from "firebase";
+import { auth } from './firebase_db';
 import Loader from "./Loader/Loader";
 import { Input, Button, Col, Row } from "antd";
 
 export const MainComponent = () => {
   const [todos, setTodos] = useState([]);
   const [input, setInput] = useState("");
+  const [flag, setFlag] = useState(false);
 
   useEffect(() => {
     db.collection("todos")
-      .orderBy("timestamp", "desc")
-      .onSnapshot((snapshot) => {
-        setTodos(
-          snapshot.docs.map((doc) => ({ id: doc.id, todo: doc.data().todo }))
-        );
-      });
+    .doc(auth.currentUser.email)
+    .onSnapshot(snapshot => {
+      try{
+      setTodos(snapshot.data().todos);
+      setFlag(true);
+      }
+      catch(err)
+      {
+        setTodos(["Start adding Tasks!"]);
+        setFlag(true);
+      }
+    })
   }, []);
 
   const update = (e) => {
     setInput(e.target.value);
   };
 
-  const addTodo = (e) => {
+  const addTodo = async (e) => {
     e.preventDefault();
-    db.collection("todos").add({
-      todo: input,
-      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    let pre = [input];
+    try{
+    pre = await db.collection("todos").doc(auth.currentUser.email).get().then(data => {
+      return data.data().todos;
     });
+    pre.push(input);
+  }
+  catch(err){}
+    db.collection("todos").doc(auth.currentUser.email).set({
+      todos: pre
+    })
     setInput("");
   };
   return (
     <div>
+      <h1>{auth.currentUser.email.substr(0, auth.currentUser.email.length-10)}</h1>
       <form onSubmit={addTodo}>
         <Row justify="center">
           <Col md={16} lg={16} sm={16} xs={20}>
@@ -56,7 +71,7 @@ export const MainComponent = () => {
         </Row>
       </form>
       <Row justify="center">
-        {todos.length === 0 ? (
+        {!flag? (
           <Loader />
         ) : (
           todos.map((todo, index) => {

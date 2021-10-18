@@ -1,24 +1,34 @@
 import React, { useState } from "react";
 import "./Todo.css";
+import { auth } from "./firebase_db";
 import { db } from "./firebase_db";
 import { Card, Button, Modal, Input } from "antd";
 
 export const Todo = ({ todo }) => {
   const [visibility, setVisibility] = useState(false);
   const [input, setInput] = useState("");
-  const [id, setId] = useState("");
 
-  const showModal = (idEdit) => {
+  const showModal = () => {
     setVisibility(true);
-    setId(idEdit);
   };
 
-  const editTodo = () => {
-      db.collection('todos').doc(id).update({
-          todo: input
-      })
-      setVisibility(false);
-      setInput("");
+  const editTodo = async (todo) => {
+    let pre = await db.collection("todos").doc(auth.currentUser.email).get()
+    .then((data) => {
+      return data.data().todos;
+    })
+    for (let i = 0; i < pre.length; i++) {
+      if(pre[i] === todo)
+      {
+        pre[i] = input;
+        break;
+      }    
+    }
+    db.collection("todos").doc(auth.currentUser.email).update({
+      todos: pre
+    })
+    setVisibility(false);
+    setInput("");
   };
 
   const handleCancel = () => {
@@ -26,32 +36,38 @@ export const Todo = ({ todo }) => {
     setInput("");
   };
 
-  const deleteTodo = () => {
-    db.collection("todos").doc(todo.id).delete();
+  const deleteTodo = async (todo) => {
+    let pre = await db.collection("todos").doc(auth.currentUser.email).get()
+    .then((data) => {
+      return data.data().todos.filter((one) => one !== todo);
+    })
+    db.collection("todos").doc(auth.currentUser.email).update({
+      todos: pre
+    })
   };
   return (
     <div>
       <Card className="card-style">
-        <p>{todo.todo}</p>
+        <p>{todo}</p>
         <Button
-          onClick={() => showModal(todo.id)}
+          onClick={() => showModal()}
           type="dashed"
           style={{ marginRight: "10px" }}
         >
           Edit
         </Button>
-        <Button onClick={deleteTodo} type="danger">
+        <Button onClick={() => deleteTodo(todo)} type="danger">
           Delete
         </Button>
       </Card>
       <Modal
         title="Edit Task"
         visible={visibility}
-        onOk={() => editTodo(todo.id)}
+        onOk={() => editTodo(todo)}
         onCancel={handleCancel}
       >
         <Input
-        placeholder={todo.todo}
+        placeholder={todo}
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
