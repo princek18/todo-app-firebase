@@ -12,20 +12,11 @@ export const Todo = ({ todo }) => {
     setVisibility(true);
   };
 
-  const editTodo = async (todo) => {
-    let pre = await db.collection("todos").doc(auth.currentUser.email).get()
-    .then((data) => {
-      return data.data().todos;
-    })
-    for (let i = 0; i < pre.length; i++) {
-      if(pre[i] === todo)
-      {
-        pre[i] = input;
-        break;
-      }    
-    }
-    db.collection("todos").doc(auth.currentUser.email).update({
-      todos: pre
+  const editTodo = async (id) => {
+    db.collection('todo')
+    .doc(auth.currentUser.email)
+    .collection('todos').doc(id).update({
+      todo: input
     })
     setVisibility(false);
     setInput("");
@@ -36,19 +27,34 @@ export const Todo = ({ todo }) => {
     setInput("");
   };
 
-  const deleteTodo = async (todo) => {
-    let pre = await db.collection("todos").doc(auth.currentUser.email).get()
-    .then((data) => {
-      return data.data().todos.filter((one) => one !== todo);
+  const doneTodo = async (id) => {
+    const user = auth.currentUser.email;
+
+    let done = await db.collection("todo")
+    .doc(user)
+    .collection('todos').doc(id).get()
+    .then((snap) => {
+      return snap.data();
     })
-    db.collection("todos").doc(auth.currentUser.email).update({
-      todos: pre
-    })
+
+    db.collection('todo')
+    .doc(user)
+    .collection('todos').doc(id).delete();
+
+    let time = Date().toLocaleString();
+    done['timeDone'] = time.substr(0, time.length-31);
+
+    db.collection('todo')
+    .doc(user)
+    .collection('completed').add(
+      done
+    )
   };
   return (
     <div>
-      <Card className="card-style">
-        <p>{todo}</p>
+      <Card className="card-style card-todo">
+      <p className="dateC">{todo.timeC}</p>
+        <p>{todo.todo}</p>
         <Button
           onClick={() => showModal()}
           type="dashed"
@@ -56,18 +62,19 @@ export const Todo = ({ todo }) => {
         >
           Edit
         </Button>
-        <Button onClick={() => deleteTodo(todo)} type="danger">
-          Delete
+        <Button danger onClick={() => doneTodo(todo.id)}>
+          Done
         </Button>
+        <p className="dateC">&nbsp;</p>
       </Card>
       <Modal
         title="Edit Task"
         visible={visibility}
-        onOk={() => editTodo(todo)}
+        onOk={() => editTodo(todo.id)}
         onCancel={handleCancel}
       >
         <Input
-        placeholder={todo}
+        placeholder={todo.todo}
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}

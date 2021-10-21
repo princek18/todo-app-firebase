@@ -1,0 +1,18 @@
+.card-todo-del{
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 0px 29px 0px;
+    border-radius: 5px !important;
+    border-right: 3px solid red !important;
+    width: 300px;
+}
+.dateC{
+    font-size: 12px;
+    color: gray;
+    text-align: left;
+}
+.dateD{
+    font-size: 12px;
+    color: gray;
+    text-align: right;
+    margin: 0px;
+    margin-top: 1em;
+}

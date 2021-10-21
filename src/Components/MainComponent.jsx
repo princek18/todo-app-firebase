@@ -1,29 +1,59 @@
 import React, { useState, useEffect } from "react";
 import { Todo } from "./Todo";
 import { db } from "./firebase_db";
-import { auth } from './firebase_db';
+import { auth } from "./firebase_db";
 import Loader from "./Loader/Loader";
 import { Input, Button, Col, Row } from "antd";
+import { CompletedTodo } from "./CompletedTodo/CompletedTodo";
 
 export const MainComponent = () => {
   const [todos, setTodos] = useState([]);
+  const [completed, setCompleted] = useState([]);
   const [input, setInput] = useState("");
   const [flag, setFlag] = useState(false);
 
   useEffect(() => {
-    db.collection("todos")
-    .doc(auth.currentUser.email)
-    .onSnapshot(snapshot => {
-      try{
-      setTodos(snapshot.data().todos);
-      setFlag(true);
-      }
-      catch(err)
-      {
-        setTodos(["Start adding Tasks!"]);
+    db.collection("todo")
+      .doc(auth.currentUser.email)
+      .collection("todos")
+      .orderBy('timeCreated', 'asc')
+      .onSnapshot((snapshot) => {
+        try{
+          setTodos(
+            snapshot.docs.map((doc) => {
+              return {
+                id: doc.id,
+                todo: doc.data().todo,
+                timeC: doc.data().timeCreated,
+              };
+            })
+          );
+        }
+        catch(err){}
         setFlag(true);
-      }
-    })
+      });
+  }, []);
+
+  useEffect(() => {
+    db.collection("todo")
+      .doc(auth.currentUser.email)
+      .collection("completed")
+      .orderBy('timeDone', 'desc')
+      .onSnapshot((snapshot) => {
+        try{
+          setCompleted(
+            snapshot.docs.map((doc) => {
+              return {
+                id: doc.id,
+                todo: doc.data().todo,
+                timeCreated: doc.data().timeCreated,
+                timeDone: doc.data().timeDone
+              };
+            })
+          );
+        }
+        catch(err){}
+      });
   }, []);
 
   const update = (e) => {
@@ -32,22 +62,21 @@ export const MainComponent = () => {
 
   const addTodo = async (e) => {
     e.preventDefault();
-    let pre = [input];
-    try{
-    pre = await db.collection("todos").doc(auth.currentUser.email).get().then(data => {
-      return data.data().todos;
-    });
-    pre.push(input);
-  }
-  catch(err){}
-    db.collection("todos").doc(auth.currentUser.email).set({
-      todos: pre
+    let time = Date().toLocaleString();
+    let time_s = time.substr(0, time.length-31);
+    db.collection('todo')
+    .doc(auth.currentUser.email)
+    .collection('todos').add({
+      timeCreated: time_s,
+      todo: input
     })
     setInput("");
   };
   return (
     <div>
-      <h1>{auth.currentUser.email.substr(0, auth.currentUser.email.length-10)}</h1>
+      <h1>
+        {auth.currentUser.email.substr(0, auth.currentUser.email.length - 10)}
+      </h1>
       <form onSubmit={addTodo}>
         <Row justify="center">
           <Col md={16} lg={16} sm={16} xs={20}>
@@ -71,17 +100,27 @@ export const MainComponent = () => {
         </Row>
       </form>
       <Row justify="center">
-        {!flag? (
+        {!flag ? (
           <Loader />
         ) : (
-          todos.map((todo, index) => {
+          todos.map((todo) => {
             return (
-              <Col key={index} style={{ margin: "20px 20px" }}>
+              <Col key={todo.id} style={{ margin: "20px 20px" }}>
                 <Todo todo={todo} />
               </Col>
             );
           })
         )}
+      </Row>
+      <h1>All Done!</h1>
+      <Row justify="center">
+          {completed.map((todo, index) => {
+            return (
+              <Col key={index} style={{ margin: "20px 20px" }}>
+                <CompletedTodo todo={todo} />
+              </Col>
+            );
+          })}
       </Row>
     </div>
   );
